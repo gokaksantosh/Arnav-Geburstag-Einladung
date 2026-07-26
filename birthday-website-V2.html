@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agar Birthday Party Invitation / Geburtstagsfeier Einladung</title>
+  <style>
+    :root {
+      --primary: #0f172a;
+      --accent: #0284c7;
+      --bg: #f8fafc;
+      --card: #ffffff;
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: #334155; margin: 0; padding: 20px; display: flex; justify-content: center; }
+    .card { background: var(--card); border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); width: 100%; max-width: 440px; padding: 28px; border-top: 6px solid var(--accent); box-sizing: border-box; }
+    .lang-toggle { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 12px; }
+    .lang-btn { background: #e2e8f0; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; }
+    .lang-btn.active { background: var(--accent); color: white; }
+    .hidden { display: none; }
+    .main-title { color: var(--primary); margin: 0 0 4px 0; font-size: 22px; text-align: center; font-weight: 800; }
+    .subtitle { color: var(--accent); margin: 0 0 20px 0; font-size: 14px; text-align: center; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    h2 { color: var(--primary); margin-top: 0; font-size: 18px; }
+    label { font-size: 14px; font-weight: 600; display: block; margin-top: 12px; }
+    input, select { width: 100%; padding: 12px; margin-top: 6px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
+    button.primary-btn { background: var(--accent); color: white; border: none; padding: 14px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; width: 100%; margin-top: 20px; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .boarding-pass { border: 2px dashed #94a3b8; padding: 16px; border-radius: 10px; margin: 16px 0; background: #f0f9ff; }
+    .boarding-pass p { margin: 6px 0; font-size: 14px; }
+    .radio-group { margin-top: 10px; }
+    .radio-option { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <!-- Language Selector -->
+  <div class="lang-toggle">
+    <button class="lang-btn active" id="btn-de" onclick="setLanguage('de')">DE</button>
+    <button class="lang-btn" id="btn-en" onclick="setLanguage('en')">EN</button>
+  </div>
+
+  <!-- Clear Main Heading -->
+  <h1 class="main-title" data-i18n="mainHeader">Arnav Geburtstagsfeier Einladung</h1>
+  <div class="subtitle">✈️ 12th Birthday Mission</div>
+
+  <!-- Step 1: Guest Login & Puzzle -->
+  <div id="step-login">
+    <h2 data-i18n="loginTitle">🛫 Flugfreigabe Check-in</h2>
+    <label data-i18n="nameLabel">Vorname des Gastes:</label>
+    <input type="text" id="friendName" placeholder="..." required>
+    
+    <label data-i18n="puzzleLabel">Sicherheitsfrage: Was hält ein Flugzeug in der Luft?</label>
+    <select id="puzzleAnswer">
+      <option value="" data-i18n="selectDefault">Bitte wählen...</option>
+      <option value="gravity" data-i18n="opt1">Schwerkraft</option>
+      <option value="lift" data-i18n="opt2">Auftrieb</option>
+      <option value="friction" data-i18n="opt3">Reibung</option>
+    </select>
+
+    <button class="primary-btn" onclick="verifyAccess()" data-i18n="checkInBtn">Check-in starten</button>
+  </div>
+
+  <!-- Step 2: Event Details & RSVP -->
+  <div id="step-rsvp" class="hidden">
+    <h2 data-i18n="boardingTitle">✈️ Bordkarte ausgestellt!</h2>
+    <p><span data-i18n="welcome">Willkommen an Bord</span>, <strong id="displayName"></strong>!</p>
+    
+    <div class="boarding-pass">
+      <p><strong>📅 <span data-i18n="dateLabel">Datum & Zeit</span>:</strong> <span id="eventDate"></span></p>
+      <p><strong>📍 <span data-i18n="venueLabel">Ort</span>:</strong> <span id="eventVenue"></span></p>
+      <p><strong>⏳ <span data-i18n="deadlineLabel">Rückmeldung bis</span>:</strong> <span id="rsvpDeadline"></span></p>
+    </div>
+
+    <label data-i18n="rsvpQuestion">Bist du dabei?</label>
+    <div class="radio-group">
+      <label class="radio-option">
+        <input type="radio" name="attendance" value="Yes" onclick="toggleEmailField(true)">
+        <span data-i18n="yesOption">Bereit zum Start! (JA)</span>
+      </label>
+      <label class="radio-option">
+        <input type="radio" name="attendance" value="No" onclick="toggleEmailField(false)">
+        <span data-i18n="noOption">Bleibe am Boden (NEIN)</span>
+      </label>
+    </div>
+
+    <!-- Email collected ONLY when Yes is chosen -->
+    <div id="emailContainer" class="hidden">
+      <label data-i18n="emailLabel">E-Mail für Flugplan-Updates (Eltern):</label>
+      <input type="email" id="parentEmail" placeholder="name@email.com">
+    </div>
+
+    <button class="primary-btn" id="submitBtn" onclick="submitRSVP()" data-i18n="submitBtn">Antwort bestätigen</button>
+  </div>
+
+  <!-- Step 3: Confirmation -->
+  <div id="step-thankyou" class="hidden">
+    <h2 data-i18n="confirmedTitle">🎉 Freigabe bestätigt!</h2>
+    <p data-i18n="thankYouText">Vielen Dank für deine Rückmeldung. Guten Flug!</p>
+  </div>
+</div>
+
+<script>
+  // -------------------------------------------------------------
+  // ⚙️ CONFIGURATION SECTION
+  // -------------------------------------------------------------
+  
+  // 1. Paste your deployed Google Apps Script Web App URL here:
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxX_XVKMVoLI-9Uk7ifZ9zsj057pKN_r4ptlPhSKgjsIKXFzUTKyIv668tkirTtQon9/exec";
+
+  // 2. Edit your party details here for German & English:
+  const EVENT_CONFIG = {
+    de: {
+      dateTime: "Samstag, 29. August 2026 @ 14:00 Uhr",
+      venue: "UCI KinoWelt, Bochum",
+      deadline: "01. August 2026"
+    },
+    en: {
+      dateTime: "Samstag, 29. August 2026 @ 14:00 Uhr",
+      venue: "UCI KinoWelt, Bochum",
+      deadline: "01. August 2026"
+    }
+  };
+
+  // -------------------------------------------------------------
+  // APPLICATION CODE
+  // -------------------------------------------------------------
+  let currentLang = 'de';
+
+  const i18n = {
+    de: {
+      mainHeader: "Arnav Geburtstagsfeier Einladung",
+      loginTitle: "🛫 Flugfreigabe Check-in",
+      nameLabel: "Vorname des Gastes:",
+      puzzleLabel: "Sicherheitsfrage: Was hält ein Flugzeug in der Luft?",
+      selectDefault: "Bitte wählen...",
+      opt1: "Schwerkraft",
+      opt2: "Auftrieb",
+      opt3: "Reibung",
+      checkInBtn: "Check-in starten",
+      boardingTitle: "✈️ Bordkarte ausgestellt!",
+      welcome: "Willkommen an Bord",
+      dateLabel: "Datum & Zeit",
+      venueLabel: "Ort",
+      deadlineLabel: "Rückmeldung bis",
+      rsvpQuestion: "Bist du dabei?",
+      yesOption: "Bereit zum Start! (JA)",
+      noOption: "Bleibe am Boden (NEIN)",
+      emailLabel: "E-Mail für Flugplan-Updates (Eltern):",
+      submitBtn: "Antwort bestätigen",
+      sendingBtn: "Wird gesendet...",
+      confirmedTitle: "🎉 Freigabe bestätigt!",
+      thankYouText: "Vielen Dank für deine Rückmeldung. Guten Flug!",
+      errName: "Bitte gib deinen Vornamen ein.",
+      errPuzzle: "Falsche Antwort! Tipp: Welche Kraft drückt nach oben?",
+      errRadio: "Bitte wähle Ja oder Nein aus.",
+      errEmail: "Bitte gib eine E-Mail-Adresse für Benachrichtigungen ein."
+    },
+    en: {
+      mainHeader: "Arnav Birthday Party Invitation",
+      loginTitle: "🛫 Flight Clearance Check-in",
+      nameLabel: "Guest First Name:",
+      puzzleLabel: "Security Question: What force keeps a plane in the air?",
+      selectDefault: "Select option...",
+      opt1: "Gravity",
+      opt2: "Lift",
+      opt3: "Friction",
+      checkInBtn: "Start Check-in",
+      boardingTitle: "✈️ Boarding Pass Issued!",
+      welcome: "Welcome aboard",
+      dateLabel: "Date & Time",
+      venueLabel: "Venue",
+      deadlineLabel: "RSVP Deadline",
+      rsvpQuestion: "Are you joining?",
+      yesOption: "Ready for takeoff! (YES)",
+      noOption: "Grounded / Cannot come (NO)",
+      emailLabel: "Email for updates (Parents):",
+      submitBtn: "Confirm Response",
+      sendingBtn: "Sending...",
+      confirmedTitle: "🎉 Clearance Confirmed!",
+      thankYouText: "Thank you for responding. Have a great flight!",
+      errName: "Please enter your first name.",
+      errPuzzle: "Incorrect answer! Hint: Which force pushes upwards?",
+      errRadio: "Please select Yes or No.",
+      errEmail: "Please enter an email address for notifications."
+    }
+  };
+
+  function renderEventDetails() {
+    const config = EVENT_CONFIG[currentLang];
+    document.getElementById('eventDate').innerText = config.dateTime;
+    document.getElementById('eventVenue').innerText = config.venue;
+    document.getElementById('rsvpDeadline').innerText = config.deadline;
+  }
+
+  function setLanguage(lang) {
+    currentLang = lang;
+    document.getElementById('btn-de').classList.toggle('active', lang === 'de');
+    document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (i18n[lang][key]) el.innerText = i18n[lang][key];
+    });
+
+    renderEventDetails();
+  }
+
+  function verifyAccess() {
+    const name = document.getElementById('friendName').value.trim();
+    const answer = document.getElementById('puzzleAnswer').value;
+    
+    if (!name) { alert(i18n[currentLang].errName); return; }
+    if (answer !== 'lift') { alert(i18n[currentLang].errPuzzle); return; }
+
+    document.getElementById('displayName').innerText = name;
+    document.getElementById('step-login').classList.add('hidden');
+    document.getElementById('step-rsvp').classList.remove('hidden');
+  }
+
+  function toggleEmailField(show) {
+    document.getElementById('emailContainer').classList.toggle('hidden', !show);
+  }
+
+  function submitRSVP() {
+    const name = document.getElementById('friendName').value.trim();
+    const attendance = document.querySelector('input[name="attendance"]:checked');
+    const email = document.getElementById('parentEmail').value.trim();
+    const btn = document.getElementById('submitBtn');
+
+    if (!attendance) { alert(i18n[currentLang].errRadio); return; }
+    if (attendance.value === "Yes" && !email) { alert(i18n[currentLang].errEmail); return; }
+
+    btn.disabled = true;
+    btn.innerText = i18n[currentLang].sendingBtn;
+
+    const payload = {
+      firstName: name,
+      attending: attendance.value,
+      email: email,
+      language: currentLang
+    };
+
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === 'success') {
+        document.getElementById('step-rsvp').classList.add('hidden');
+        document.getElementById('step-thankyou').classList.remove('hidden');
+      } else {
+        alert("Error: " + data.message);
+        btn.disabled = false;
+        btn.innerText = i18n[currentLang].submitBtn;
+      }
+    })
+    .catch(err => {
+      // Fallback display on success redirect
+      document.getElementById('step-rsvp').classList.add('hidden');
+      document.getElementById('step-thankyou').classList.remove('hidden');
+    });
+  }
+
+  // Initialize display on load
+  renderEventDetails();
+</script>
+</body>
+</html>

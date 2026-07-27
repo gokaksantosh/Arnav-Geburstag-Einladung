@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Agar Birthday Party Invitation / Geburtstagsfeier Einladung</title>
+  <title>Arnav Birthday Party Invitation / Geburtstagsfeier Einladung</title>
   <style>
     :root {
       --primary: #0f172a;
@@ -74,20 +74,17 @@
     <label data-i18n="rsvpQuestion">Bist du dabei?</label>
     <div class="radio-group">
       <label class="radio-option">
-        <input type="radio" name="attendance" value="Yes" onclick="toggleEmailField(true)">
+        <input type="radio" name="attendance" value="Yes">
         <span data-i18n="yesOption">Bereit zum Start! (JA)</span>
       </label>
       <label class="radio-option">
-        <input type="radio" name="attendance" value="No" onclick="toggleEmailField(false)">
+        <input type="radio" name="attendance" value="No">
         <span data-i18n="noOption">Bleibe am Boden (NEIN)</span>
       </label>
     </div>
 
-    <!-- Email collected ONLY when Yes is chosen -->
-    <div id="emailContainer" class="hidden">
-      <label data-i18n="emailLabel">E-Mail für Flugplan-Updates (Eltern):</label>
-      <input type="email" id="parentEmail" placeholder="name@email.com">
-    </div>
+    <label data-i18n="ageLabel">Alter des Gastes:</label>
+    <input type="number" id="guestAge" placeholder="10" min="1" required>
 
     <button class="primary-btn" id="submitBtn" onclick="submitRSVP()" data-i18n="submitBtn">Antwort bestätigen</button>
   </div>
@@ -111,12 +108,12 @@
   const EVENT_CONFIG = {
     de: {
       dateTime: "Samstag, 29. August 2026 @ 14:00 Uhr",
-      venue: "UCI KinoWelt, Bochum",
+      venue: "Wird Noch Entschieden",
       deadline: "01. August 2026"
     },
     en: {
       dateTime: "Samstag, 29. August 2026 @ 14:00 Uhr",
-      venue: "UCI KinoWelt, Bochum",
+      venue: "Shall be decided later",
       deadline: "01. August 2026"
     }
   };
@@ -153,7 +150,16 @@
       errName: "Bitte gib deinen Vornamen ein.",
       errPuzzle: "Falsche Antwort! Tipp: Welche Kraft drückt nach oben?",
       errRadio: "Bitte wähle Ja oder Nein aus.",
-      errEmail: "Bitte gib eine E-Mail-Adresse für Benachrichtigungen ein."
+      ageLabel: "Alter des Gastes:",
+      submitBtn: "Antwort bestätigen",
+      sendingBtn: "Wird gesendet...",
+      confirmedTitle: "🎉 Freigabe bestätigt!",
+      thankYouText: "Vielen Dank für deine Rückmeldung. Guten Flug!",
+      errName: "Bitte gib deinen Vornamen ein.",
+      errPuzzle: "Falsche Antwort! Tipp: Welche Kraft drückt nach oben?",
+      errRadio: "Bitte wähle Ja oder Nein aus.",
+      errAge: "Bitte gib dein Alter ein.",
+      errTooYoung: "Alter nicht erlaubt. Du musst mindestens 10 Jahre alt sein."
     },
     en: {
       mainHeader: "Arnav Birthday Party Invitation",
@@ -173,7 +179,7 @@
       rsvpQuestion: "Are you joining?",
       yesOption: "Ready for takeoff! (YES)",
       noOption: "Grounded / Cannot come (NO)",
-      emailLabel: "Email for updates (Parents):",
+      ageLabel: "Guest age:",
       submitBtn: "Confirm Response",
       sendingBtn: "Sending...",
       confirmedTitle: "🎉 Clearance Confirmed!",
@@ -181,7 +187,8 @@
       errName: "Please enter your first name.",
       errPuzzle: "Incorrect answer! Hint: Which force pushes upwards?",
       errRadio: "Please select Yes or No.",
-      errEmail: "Please enter an email address for notifications."
+      errAge: "Please enter your age.",
+      errTooYoung: "Age not allowed. You must be at least 10 years old."
     }
   };
 
@@ -217,18 +224,19 @@
     document.getElementById('step-rsvp').classList.remove('hidden');
   }
 
-  function toggleEmailField(show) {
-    document.getElementById('emailContainer').classList.toggle('hidden', !show);
-  }
-
   function submitRSVP() {
     const name = document.getElementById('friendName').value.trim();
     const attendance = document.querySelector('input[name="attendance"]:checked');
-    const email = document.getElementById('parentEmail').value.trim();
+    const ageValue = document.getElementById('guestAge').value.trim();
+    const age = Number(ageValue);
     const btn = document.getElementById('submitBtn');
 
     if (!attendance) { alert(i18n[currentLang].errRadio); return; }
-    if (attendance.value === "Yes" && !email) { alert(i18n[currentLang].errEmail); return; }
+    if (!ageValue) { alert(i18n[currentLang].errAge); return; }
+    if (Number.isNaN(age) || age < 10) {
+      alert(i18n[currentLang].errTooYoung);
+      return;
+    }
 
     btn.disabled = true;
     btn.innerText = i18n[currentLang].sendingBtn;
@@ -236,7 +244,7 @@
     const payload = {
       firstName: name,
       attending: attendance.value,
-      email: email,
+      age: age,
       language: currentLang
     };
 
